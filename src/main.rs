@@ -2,6 +2,7 @@ use std::io::Write;
 use std::str::FromStr;
 
 use serde::{Serialize, Deserialize};
+use futures::executor::block_on;
 
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -10,14 +11,24 @@ struct Message {
 }
 
 
-fn process<T:FromStr>(y:i64, x:i64) -> Option<(T, T)> {
+struct Absolute;
+
+
+async fn process<T:FromStr>(y:i64, x:i64) -> Option<(T, T)> {
     let mut z = T::from_str("test");
-    let msg = Message {contents: "test".to_string()};
+    let product = y * x;
+    let msg = Box::<Message>::new(Message {contents: "test".to_string()});
+    Box::<Absolute>::new(Absolute);
+    println!("In Async {}", product);
+    async {
+        println!("Am i getting the hang of this.")
+    }.await;
     return None
 }
 
 
 fn main() {
+    Absolute;
     let mut numbers: Vec<u64> = Vec::new();
     println!("Hello, world!");
     let mut d = u64::from_str("2");
@@ -27,6 +38,13 @@ fn main() {
     }
     numbers.push(d.expect("something went wrong"));
     println!("{:?}", numbers);
+    let entry_point = async move {
+        process::<i32>(6, 2).await;
+    };
+    block_on(entry_point);
+
+    println!("{}", "test");
+    let m:[i16;4];
     std::process::exit(0);
 }
 
