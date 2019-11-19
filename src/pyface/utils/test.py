@@ -1,5 +1,4 @@
 import unittest
-
 from .baseline import read_data
 
 class TestModule(unittest.TestCase):
@@ -12,3 +11,6 @@ class TestModule(unittest.TestCase):
         """
         v = read_data(1)
         self.assertEqual(v, '{}'.format([i for i in range(10)]))
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

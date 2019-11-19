@@ -9,7 +9,6 @@ cpython = "0.3"
 serde =  { version = "1.0.101", features = ["derive"] }
 futures = "0.3.1"
 
-
 [[bin]]
 name = "rl_course"
 path = "src/main.rs"

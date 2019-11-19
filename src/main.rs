@@ -17,7 +17,7 @@ struct Message {
 #[derive(Debug)]
 struct Absolute;
 
-const MyModule: &'static str = include_str!("./pyface/baseline.py");
+const MyModule: &'static str = include_str!("./pyface/utils/baseline.py");
 
 
 async fn process<T:FromStr>(y:i64, x:i64) -> Option<(T, T)> {
@@ -107,8 +107,18 @@ fn test_python_unittest() -> PyResult<()>{
     let py = gil.python();
     let locals = PyDict::new(py);
     let unit = py.import("unittest")?;
+    const py_tests: &'static str = include_str!("./pyface/__init__.py");
+    let m = module_from_str(py, "pyface", py_tests)?;
     locals.set_item(py, "unittest", unit)?;
-    py.eval("unittest.main(verbosity=2)", None, Some(&locals));
+    locals.set_item(py, "pyface", m)?;
+    match py.eval("print(dir(pyface))", None, Some(&locals)){
+        Ok(v) => (),
+        Err(e) => writeln!(std::io::stderr(), "Python error {:?}", e).unwrap(),
+    }
+    match py.eval("unittest.main(module='pyface.utils.test', verbosity=2, exit=False)", None, Some(&locals)){
+        Ok(v) => (),
+        Err(e) => writeln!(std::io::stderr(), "Python error {:?}", e).unwrap(),
+    }
 
     Ok(())
 }
