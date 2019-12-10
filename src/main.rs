@@ -11,6 +11,7 @@ use futures::executor::block_on;
 #[derive(Serialize, Deserialize, Debug)]
 struct Message {
    contents: String,
+   real: Option<String>,
 }
 
 
@@ -23,7 +24,14 @@ const MyModule: &'static str = include_str!("./pyface/utils/baseline.py");
 async fn process<T:FromStr>(y:i64, x:i64) -> Option<(T, T)> {
     let mut z = T::from_str("test");
     let product = y * x;
-    let msg = Box::<Message>::new(Message {contents: "test".to_string()});
+    let mut msg = Box::<Message>::new(Message {contents: "test".to_string(), real: Some("yes".to_string())});
+    let mut real = msg.real.take();
+    println!("Is msg real {:?}", real);
+
+    let mut for_me = Message {contents: "test".to_string(), real: Some("yes".to_string())};
+    real = for_me.real.take();
+    println!("Is for_me real {:?}", real);
+
     Box::<Absolute>::new(Absolute);
     println!("In Async {}", product);
     let does_work = async {
@@ -39,7 +47,7 @@ fn call_python() -> PyResult<Message> {
     let m = module_from_str(py, "baseline", MyModule)?;
     let out: String = m.call(py, "read_data", (2,), None)?.extract(py)?;
     println!("{:?}", out);
-    Ok(Message { contents: "good".to_string()})
+    Ok(Message { contents: "good".to_string(), real: Some("yes".to_string())})
 }
 
 
@@ -48,6 +56,11 @@ fn module_from_str(py: Python<'_>, name: &str, source: &str) -> PyResult<PyModul
     m.add(py, "__builtins__", py.import("builtins")?)?;
     let m_locals = m.get(py, "__dict__")?.extract(py)?;
     py.run(source, Some(&m_locals), None)?;
+    Ok(m)
+}
+
+fn module_from_directory(py: Python<'_>, name: &str) -> PyResult<PyModule> {
+    let m = PyModule::import(py, name)?;
     Ok(m)
 }
 
@@ -106,11 +119,18 @@ fn test_python_unittest() -> PyResult<()>{
     let gil = Python::acquire_gil();
     let py = gil.python();
     let locals = PyDict::new(py);
+    let py_sys = py.import("sys")?;
+    locals.set_item(py, "sys", py_sys)?;
+    py.eval("print(sys.path)", None, Some(&locals))?;
+    // __file__ is not defined tho ...
+    //sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
     let unit = py.import("unittest")?;
-    const py_tests: &'static str = include_str!("./pyface/__init__.py");
-    let m = module_from_str(py, "pyface", py_tests)?;
+    let m = module_from_directory(py, "pyface")?;
+
     locals.set_item(py, "unittest", unit)?;
     locals.set_item(py, "pyface", m)?;
+
+
     match py.eval("print(dir(pyface))", None, Some(&locals)){
         Ok(v) => (),
         Err(e) => writeln!(std::io::stderr(), "Python error {:?}", e).unwrap(),
