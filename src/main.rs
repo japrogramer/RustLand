@@ -115,6 +115,11 @@ fn test_scope(){
             println!("Testing life time break {:?}", i);
             break 'search;
         }
+    fn serve() -> !{
+        loop {
+            let s = "test".to_string();
+        }
+    }
 }
 
 #[test]
