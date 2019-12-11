@@ -101,9 +101,20 @@ async fn test_me() {
 #[test]
 fn test_async_functions(){
     let entry_point = async move {
+        println!("Entering async test");
         test_me().await;
     };
     block_on(entry_point);
+}
+
+#[test]
+fn test_scope(){
+    println!("Entering lifetime test");
+    'search:
+        for i in 1..3 {
+            println!("Testing life time break {:?}", i);
+            break 'search;
+        }
 }
 
 #[test]
@@ -136,7 +147,9 @@ fn test_python_unittest() -> PyResult<()>{
         Err(e) => writeln!(std::io::stderr(), "Python error {:?}", e).unwrap(),
     }
     match py.eval("unittest.main(module='pyface.utils.test', verbosity=2, exit=False)", None, Some(&locals)){
-        Ok(v) => (),
+        Ok(v) => {
+            ()
+        }
         Err(e) => writeln!(std::io::stderr(), "Python error {:?}", e).unwrap(),
     }
 
