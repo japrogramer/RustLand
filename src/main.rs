@@ -35,6 +35,8 @@ async fn process<T:FromStr>(y:i64, x:i64) -> Option<(T, T)> {
     Box::<Absolute>::new(Absolute);
     println!("In Async {}", product);
     async {
+        let pi: f64 = std::f64::consts::PI;
+        println!("This is pi {:?}", pi);
         println!("Am i getting the hang of this.")
     }.await;
     return None
