@@ -18,7 +18,7 @@ struct Message {
 #[derive(Debug)]
 struct Absolute;
 
-const MyModule: &'static str = include_str!("./pyface/utils/baseline.py");
+const MY_MODULE: &'static str = include_str!("./pyface/utils/baseline.py");
 
 
 async fn process<T:FromStr>(y:i64, x:i64) -> Option<(T, T)> {
@@ -34,7 +34,7 @@ async fn process<T:FromStr>(y:i64, x:i64) -> Option<(T, T)> {
 
     Box::<Absolute>::new(Absolute);
     println!("In Async {}", product);
-    let does_work = async {
+    async {
         println!("Am i getting the hang of this.")
     }.await;
     return None
@@ -44,7 +44,7 @@ async fn process<T:FromStr>(y:i64, x:i64) -> Option<(T, T)> {
 fn call_python() -> PyResult<Message> {
     let gil = Python::acquire_gil();
     let py = gil.python();
-    let m = module_from_str(py, "baseline", MyModule)?;
+    let m = module_from_str(py, "baseline", MY_MODULE)?;
     let out: String = m.call(py, "read_data", (2,), None)?.extract(py)?;
     println!("{:?}", out);
     Ok(Message { contents: "good".to_string(), real: Some("yes".to_string())})
@@ -56,11 +56,6 @@ fn module_from_str(py: Python<'_>, name: &str, source: &str) -> PyResult<PyModul
     m.add(py, "__builtins__", py.import("builtins")?)?;
     let m_locals = m.get(py, "__dict__")?.extract(py)?;
     py.run(source, Some(&m_locals), None)?;
-    Ok(m)
-}
-
-fn module_from_directory(py: Python<'_>, name: &str) -> PyResult<PyModule> {
-    let m = PyModule::import(py, name)?;
     Ok(m)
 }
 
@@ -93,13 +88,12 @@ fn main() {
 }
 
 
-async fn test_me() {
-    assert_eq!(process::<i32>(1, 2).await, None);
-    assert_eq!(process::<i32>(5, 6).await, None);
-}
-
 #[test]
 fn test_async_functions(){
+    async fn test_me() {
+        assert_eq!(process::<i32>(1, 2).await, None);
+        assert_eq!(process::<i32>(5, 6).await, None);
+    }
     let entry_point = async move {
         println!("Entering async test");
         test_me().await;
@@ -141,7 +135,7 @@ fn test_python_unittest() -> PyResult<()>{
     // __file__ is not defined tho ...
     //sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
     let unit = py.import("unittest")?;
-    let m = module_from_directory(py, "pyface")?;
+    let m = PyModule::import(py, "pyface")?;
 
     locals.set_item(py, "unittest", unit)?;
     locals.set_item(py, "pyface", m)?;
