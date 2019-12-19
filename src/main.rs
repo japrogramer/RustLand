@@ -89,70 +89,75 @@ fn main() {
     std::process::exit(0);
 }
 
+#[cfg(test)]
+mod tests{
+    use super::*;
 
-#[test]
-fn test_async_functions(){
-    async fn test_me() {
+    async fn async_fun() {
         assert_eq!(process::<i32>(1, 2).await, None);
         assert_eq!(process::<i32>(5, 6).await, None);
     }
-    let entry_point = async move {
-        println!("Entering async test");
-        test_me().await;
-    };
-    block_on(entry_point);
-}
 
-#[test]
-fn test_scope(){
-    println!("Entering lifetime test");
-    'search:
-        for i in 1..3 {
-            println!("Testing life time break {:?}", i);
-            break 'search;
+    #[test]
+    fn test_async_functions(){
+        let entry_point = async move {
+            println!("Entering async test");
+            async_fun().await;
+        };
+        block_on(entry_point);
+    }
+
+    #[test]
+    fn test_scope(){
+        println!("Entering lifetime test");
+        'search:
+            for i in 1..3 {
+                println!("Testing life time break {:?}", i);
+                break 'search;
+            }
+        fn serve() -> !{
+            loop {
+                let s = "test".to_string();
+            }
         }
-    fn serve() -> !{
-        loop {
-            let s = "test".to_string();
+    }
+
+    #[test]
+    fn test_python_call(){
+        match call_python(){
+            Ok(v) => (),
+            Err(e) => (),
         }
     }
-}
 
-#[test]
-fn test_python_call(){
-    match call_python(){
-        Ok(v) => (),
-        Err(e) => (),
-    }
-}
+    #[test]
+    fn test_python_unittest() -> PyResult<()>{
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+        let locals = PyDict::new(py);
+        let py_sys = py.import("sys")?;
+        locals.set_item(py, "sys", py_sys)?;
+        py.eval("print(sys.path)", None, Some(&locals))?;
+        // __file__ is not defined tho ...
+        //sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
+        let unit = py.import("unittest")?;
+        let m = PyModule::import(py, "pyface")?;
 
-#[test]
-fn test_python_unittest() -> PyResult<()>{
-    let gil = Python::acquire_gil();
-    let py = gil.python();
-    let locals = PyDict::new(py);
-    let py_sys = py.import("sys")?;
-    locals.set_item(py, "sys", py_sys)?;
-    py.eval("print(sys.path)", None, Some(&locals))?;
-    // __file__ is not defined tho ...
-    //sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
-    let unit = py.import("unittest")?;
-    let m = PyModule::import(py, "pyface")?;
-
-    locals.set_item(py, "unittest", unit)?;
-    locals.set_item(py, "pyface", m)?;
+        locals.set_item(py, "unittest", unit)?;
+        locals.set_item(py, "pyface", m)?;
 
 
-    match py.eval("print(dir(pyface))", None, Some(&locals)){
-        Ok(v) => (),
-        Err(e) => writeln!(std::io::stderr(), "Python error {:?}", e).unwrap(),
-    }
-    match py.eval("unittest.main(module='pyface.utils.test', verbosity=2, exit=False)", None, Some(&locals)){
-        Ok(v) => {
-            ()
+        match py.eval("print(dir(pyface))", None, Some(&locals)){
+            Ok(v) => (),
+            Err(e) => writeln!(std::io::stderr(), "Python error {:?}", e).unwrap(),
         }
-        Err(e) => writeln!(std::io::stderr(), "Python error {:?}", e).unwrap(),
-    }
+        match py.eval("unittest.main(module='pyface.utils.test', verbosity=2, exit=False)", None, Some(&locals)){
+            Ok(v) => {
+                ()
+            }
+            Err(e) => writeln!(std::io::stderr(), "Python error {:?}", e).unwrap(),
+        }
 
-    Ok(())
+        Ok(())
+    }
 }
