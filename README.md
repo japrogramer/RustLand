@@ -31,6 +31,11 @@ cargo run
 ```
 cargo test
 ```
+### Debugging
+
+```
+strace -f -s100 cargo run
+```
 
 ### Coding style
 
