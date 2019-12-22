@@ -40,7 +40,7 @@ strace -f -s100 cargo run
 ### Coding style
 
 Testing out features and creates,
-for no some good.
+for some good.
 
 ## Contributing
 
