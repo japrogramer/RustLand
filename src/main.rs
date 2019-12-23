@@ -1,5 +1,6 @@
 use std::io::Write;
 use std::str::FromStr;
+use std::fmt::Display;
 use std::path::{Path, PathBuf};
 
 use cpython::{Python, PyDict, PyResult, PyModule};
@@ -21,8 +22,13 @@ struct Absolute;
 const MY_MODULE: &'static str = include_str!("./pyface/utils/baseline.py");
 
 
-async fn process<T:FromStr>(y:i64, x:i64) -> Option<(T, T)> {
-    let mut z = T::from_str("test");
+async fn process<T:FromStr+Display>(y:i64, x:i64) -> Option<(T, T)> {
+    if let mut z = T::from_str("3") {
+        match z {
+            Ok(m) => println!("Let their be -> {}", m),
+            _ => eprintln!("Error in if let "),
+        }
+    }
     let product = y * x;
     let mut msg = Box::<Message>::new(Message {contents: "test".to_string(), real: Some("yes".to_string())});
     let mut real = msg.real.take();
