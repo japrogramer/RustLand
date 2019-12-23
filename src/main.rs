@@ -136,7 +136,11 @@ mod tests{
         let py = gil.python();
         let locals = PyDict::new(py);
         let py_sys = py.import("sys")?;
+        let py_os = py.import("os")?;
         locals.set_item(py, "sys", py_sys)?;
+        locals.set_item(py, "os", py_os)?;
+        py.eval("print(sys.path)", None, Some(&locals))?;
+        py.eval(r##"sys.path.append(os.path.join(os.path.realpath(os.path.curdir), "src"))"##, None, Some(&locals))?;
         py.eval("print(sys.path)", None, Some(&locals))?;
         // __file__ is not defined tho ...
         //sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
