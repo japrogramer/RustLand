@@ -22,7 +22,9 @@ struct Absolute;
 const MY_MODULE: &'static str = include_str!("./pyface/utils/baseline.py");
 
 
-async fn process<T:FromStr+Display>(y:i64, x:i64) -> Option<(T, T)> {
+async fn process<T>(y:i64, x:i64) -> Option<(T, T)> 
+    where T: FromStr + Display
+{
     if let mut z = T::from_str("3") {
         match z {
             Ok(m) => println!("Let their be -> {}", m),
