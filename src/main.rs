@@ -69,14 +69,24 @@ fn module_from_str(py: Python<'_>, name: &str, source: &str) -> PyResult<PyModul
 
 
 fn main() {
+    // An
     Absolute;
-    let mut numbers: Vec<u64> = Vec::new();
+    // Unit
+
+    // tautology
+    let large: Vec<i32> = (0..1000).collect::<Vec<i32>>();
+
+    let mut numbers: Vec<u8> = Vec::new();
+    let writer: &mut dyn Write = &mut numbers;
+
     println!("Hello, world!");
-    let mut d = u64::from_str("2");
+    let mut d = u8::from_str("2");
     match d.as_mut(){
         Ok(v) => numbers.push(*v),
+        //Ok(v) => writer.write(*v),
         Err(e) => writeln!(std::io::stderr(), "test {:?}", e).unwrap(),
     }
+
     numbers.push(d.expect("something went wrong"));
     println!("{:?}", numbers);
     let entry_point = async move {
