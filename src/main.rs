@@ -1,3 +1,4 @@
+#![feature(label_break_value)]
 use std::io::Write;
 use std::str::FromStr;
 use std::fmt::Display;
@@ -127,12 +128,16 @@ mod tests{
 
     #[test]
     fn test_scope(){
-        println!("Entering lifetime test");
-        'search:
-            for i in 1..3 {
-                println!("Testing life time break {:?}", i);
-                break 'search;
-            }
+        println!("Entering labels test");
+        'nomember: {
+            let gil = Python::acquire_gil();
+            'search:
+                for i in 1..3 {
+                    println!("Testing labels break {:?}", i);
+                    break 'nomember;
+                }
+        }
+
         fn serve() -> !{
             loop {
                 let s = "test".to_string();
