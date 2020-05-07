@@ -118,6 +118,14 @@ mod tests{
     }
 
     #[test]
+    #[should_panic]
+    fn test_failure() {
+       block_on(async {
+        assert_eq!(process::<i32>(5, 6).await, Option::Some((1,1)));
+        });
+    }
+
+    #[test]
     fn test_async_functions(){
         let entry_point = async move {
             println!("Entering async test");
