@@ -113,8 +113,8 @@ mod tests{
     use super::*;
 
     async fn async_fun() {
-        assert_eq!(process::<i32>(1, 2).await, None);
-        assert_eq!(process::<i32>(5, 6).await, None);
+        assert_ne!(process::<i32>(1, 2).await, Option::Some((3, 4)), "Test failed");
+        assert_eq!(process::<i32>(5, 6).await, Option::None);
     }
 
     #[test]
